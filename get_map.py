@@ -10,7 +10,8 @@ from PIL import Image, ImageDraw
 legend_img = Image.open("legend.png")
 print("Loaded legend, %i by %i" % legend_img.size)
 
-luftdaten_v2_all_json = "luftdaten_v2_all_2019_02_17_19_05.json"
+# Saved from http://api.luftdaten.info/static/v2/data.json
+luftdaten_v2_all_json = "luftdaten_v2_all_2019_02_22_08_00_5mins.json"
 
 with open(luftdaten_v2_all_json) as handle:
     world_data = json.load(handle)
@@ -20,6 +21,7 @@ jobs = [
     dict(
         name="World", latitude=0, longitude=0, zoom=1, size=(500, 500), legend=(0, 285)
     ),
+    dict(name="Europe", latitude=53.9, longitude=14.5, zoom=4, size=(600,600)),
     dict(name="Germany", zoom=6, latitude=51.305, longitude=8.659, size=(600, 600)),
     dict(name="UK-small", latitude=55.2, longitude=-3.2, zoom=5, size=(512, 512)),
     dict(name="Scotland", latitude=57.78, longitude=-5, zoom=6, size=(600, 600)),
@@ -159,7 +161,8 @@ def draw_map(world_data, name, size, zoom, latitude, longitude, legend=0):
     data = [
         row
         for row in data
-        if min_long <= float(row["location"]["longitude"]) <= max_long
+        if row["location"]["longitude"] and row["location"]["latitude"]
+        and min_long <= float(row["location"]["longitude"]) <= max_long
         and min_lat <= float(row["location"]["latitude"]) <= max_lat
     ]
     print("Have %i points with map extent" % len(data))
