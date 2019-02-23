@@ -23,35 +23,16 @@ jobs = [
     dict(
         name="World", latitude=0, longitude=0, zoom=1, size=(500, 500), legend=(0, 285)
     ),
-    dict(name="Europe", latitude=53.9, longitude=14.5, zoom=4, size=(600, 600)),
-    dict(name="Germany", zoom=6, latitude=51.305, longitude=8.659, size=(600, 600)),
+    dict(name="Europe", latitude=53.9, longitude=14.5, zoom=4),
+    dict(name="Germany", zoom=6, latitude=51.305, longitude=8.659),
     dict(name="UK-small", latitude=55.2, longitude=-3.2, zoom=5, size=(512, 512)),
-    dict(name="Scotland", latitude=57.78, longitude=-5, zoom=6, size=(600, 600)),
+    dict(name="Scotland", latitude=57.78, longitude=-5, zoom=6),
+    dict(name="Aberdeen", latitude=57.155, longitude=-2.14, zoom=12, legend=(0, 385)),
+    dict(name="Bristol", zoom=12, latitude=51.463, longitude=-2.61, legend=(0, 385)),
     dict(
-        name="Aberdeen",
-        latitude=57.155,
-        longitude=-2.14,
-        zoom=12,
-        size=(600, 600),
-        legend=(0, 385),
+        name="Eastbourne", zoom=12, latitude=50.795, longitude=0.268, legend=(505, 385)
     ),
-    dict(
-        name="Bristol",
-        zoom=12,
-        latitude=51.463,
-        longitude=-2.61,
-        size=(600, 600),
-        legend=(0, 385),
-    ),
-    dict(
-        name="Eastbourne",
-        zoom=12,
-        latitude=50.795,
-        longitude=0.268,
-        size=(600, 600),
-        legend=(505, 385),
-    ),
-    dict(name="Sheffield", zoom=12, latitude=53.38, longitude=-1.47, size=(600, 600)),
+    dict(name="Sheffield", zoom=12, latitude=53.38, longitude=-1.47),
     dict(name="UK", latitude=55.3, longitude=-3.3, zoom=6, size=(1000, 1000)),
 ]
 
@@ -225,7 +206,7 @@ for job in jobs:
     draw_map(
         world_data,
         job["name"],
-        job["size"],
+        job.get("size", (600, 600)),
         job["zoom"],
         job["latitude"],
         job["longitude"],
