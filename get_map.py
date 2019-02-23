@@ -27,12 +27,10 @@ jobs = [
     dict(name="Germany", zoom=6, latitude=51.305, longitude=8.659),
     dict(name="UK-small", latitude=55.2, longitude=-3.2, zoom=5, size=(512, 512)),
     dict(name="Scotland", latitude=57.78, longitude=-5, zoom=6),
-    dict(name="Aberdeen", latitude=57.155, longitude=-2.14, zoom=12, legend=(0, 385)),
-    dict(name="Bristol", zoom=12, latitude=51.463, longitude=-2.61, legend=(0, 385)),
-    dict(
-        name="Eastbourne", zoom=12, latitude=50.795, longitude=0.268, legend=(505, 385)
-    ),
-    dict(name="Sheffield", zoom=12, latitude=53.38, longitude=-1.47),
+    dict(name="Aberdeen", latitude=57.155, longitude=-2.14, legend=(0, 385)),
+    dict(name="Bristol", latitude=51.463, longitude=-2.61, legend=(0, 385)),
+    dict(name="Eastbourne", latitude=50.795, longitude=0.268, legend=(505, 385)),
+    dict(name="Sheffield", latitude=53.38, longitude=-1.47),
     dict(name="UK", latitude=55.3, longitude=-3.3, zoom=6, size=(1000, 1000)),
 ]
 
@@ -207,7 +205,7 @@ for job in jobs:
         world_data,
         job["name"],
         job.get("size", (600, 600)),
-        job["zoom"],
+        job.get("zoom", 12),
         job["latitude"],
         job["longitude"],
         job.get("legend", (0, 0)),
