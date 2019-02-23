@@ -15,13 +15,15 @@ luftdaten_v2_all_json = "luftdaten_v2_all_2019_02_22_08_00_5mins.json"
 
 with open(luftdaten_v2_all_json) as handle:
     world_data = json.load(handle)
+world_data = [_ for _ in world_data if _["sensor"]["sensor_type"]["name"] == "SDS011"]
+print("Have %i points for SDS011 world wide" % len(world_data))
 
 # legend=0 off, 1 top left (default), 2 top right, 3 bottom right, 4 bottom left
 jobs = [
     dict(
         name="World", latitude=0, longitude=0, zoom=1, size=(500, 500), legend=(0, 285)
     ),
-    dict(name="Europe", latitude=53.9, longitude=14.5, zoom=4, size=(600,600)),
+    dict(name="Europe", latitude=53.9, longitude=14.5, zoom=4, size=(600, 600)),
     dict(name="Germany", zoom=6, latitude=51.305, longitude=8.659, size=(600, 600)),
     dict(name="UK-small", latitude=55.2, longitude=-3.2, zoom=5, size=(512, 512)),
     dict(name="Scotland", latitude=57.78, longitude=-5, zoom=6, size=(600, 600)),
@@ -33,6 +35,23 @@ jobs = [
         size=(600, 600),
         legend=(0, 385),
     ),
+    dict(
+        name="Bristol",
+        zoom=12,
+        latitude=51.463,
+        longitude=-2.61,
+        size=(600, 600),
+        legend=(0, 385),
+    ),
+    dict(
+        name="Eastbourne",
+        zoom=12,
+        latitude=50.795,
+        longitude=0.268,
+        size=(600, 600),
+        legend=(505, 385),
+    ),
+    dict(name="Sheffield", zoom=12, latitude=53.38, longitude=-1.47, size=(600, 600)),
     dict(name="UK", latitude=55.3, longitude=-3.3, zoom=6, size=(1000, 1000)),
 ]
 
@@ -153,15 +172,11 @@ def draw_map(world_data, name, size, zoom, latitude, longitude, legend=0):
     else:
         map_img.paste(legend_img)
 
-    print(
-        "Started with %i data points for world and all sensor types" % len(world_data)
-    )
-    data = [_ for _ in world_data if _["sensor"]["sensor_type"]["name"] == "SDS011"]
-    print("Have %i points for SDS011 world wide" % len(data))
     data = [
         row
-        for row in data
-        if row["location"]["longitude"] and row["location"]["latitude"]
+        for row in world_data
+        if row["location"]["longitude"]
+        and row["location"]["latitude"]
         and min_long <= float(row["location"]["longitude"]) <= max_long
         and min_lat <= float(row["location"]["latitude"]) <= max_lat
     ]
