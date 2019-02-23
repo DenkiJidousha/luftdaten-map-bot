@@ -145,6 +145,12 @@ def draw_map(world_data, name, size, zoom, latitude, longitude, legend=0):
         map_img = Image.open(background_filename)
     assert size == map_img.size
 
+    # TODO - Apply filters to make the background muted
+    # See https://www.w3schools.com/CSSref/css3_pr_filter.asp
+    # and https://github.com/opendata-stuttgart/feinstaub-map/blob/master/src/style.style
+    # img.leaflet-tile
+    # filter  grayscale(85%) saturate(150%) hue-rotate(60deg) contrast(90%) brightness(110%)
+
     if legend:
         map_img.paste(legend_img, legend)
     else:
