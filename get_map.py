@@ -11,12 +11,15 @@ from PIL import Image, ImageDraw
 legend_img = Image.open("legend.png")
 print("Loaded legend, %i by %i" % legend_img.size)
 
-# Saved from http://api.luftdaten.info/static/v2/data.json
-luftdaten_v2_all_json = "luftdaten_v2_all_2019_02_22_08_00_5mins.json"
+# Saved from http://api.luftdaten.info/static/v2/data.json (5min average)
+# or http://api.luftdaten.info/static/v2/data.1h.json
+# or http://api.luftdaten.info/static/v2/data.24h.json
+luftdaten_v2_all_json = "luftdaten_v2_all_2019_02_23_23_41_24hr.json"
 
 with open(luftdaten_v2_all_json) as handle:
     world_data = json.load(handle)
-world_data = [_ for _ in world_data if _["sensor"]["sensor_type"]["name"] == "SDS011"]
+world_data = [_ for _ in world_data if _["sensor"]["sensor_type"]["name"] == "SDS011" and _["location"]["longitude"] and _["location"]["latitude"] and _["sensordatavalues"]]
+
 print("Have %i points for SDS011 world wide" % len(world_data))
 
 # legend=0 off, 1 top left (default), 2 top right, 3 bottom right, 4 bottom left
@@ -205,23 +208,22 @@ def draw_map(world_data, name, size, zoom, latitude, longitude, legend=0):
     ]
     print("Have %i points with map extent" % len(data))
 
-    data_long = [float(_["location"]["longitude"]) for _ in data]
-    data_lat = [float(_["location"]["latitude"]) for _ in data]
+    data_pm10 = []
+    data_long = []
+    data_lat = []
+    for row in data:
+        for sensor_data_value in row["sensordatavalues"]:
+            if sensor_data_value["value_type"] == "P1":
+                data_pm10.append(float(sensor_data_value["value"]))
+                data_long.append(float(row["location"]["longitude"]))
+                data_lat.append(float(row["location"]["latitude"]))
 
     data_x, data_y = zip(
         *(geotiler_map.rev_geocode(p) for p in zip(data_long, data_lat))
     )
 
-    data_pm10 = []
-    data_pm2_5 = []
-    for row in data:
-        for sensor_data_value in row["sensordatavalues"]:
-            if sensor_data_value["value_type"] == "P1":
-                data_pm10.append(float(sensor_data_value["value"]))
-            elif sensor_data_value["value_type"] == "P2":
-                data_pm2_5.append(float(sensor_data_value["value"]))
-
-    assert len(data_pm10) == len(data_pm2_5) == len(data_long) == len(data_lat)
+    print("%i PM 10, %i long, %i lat" % (len(data_pm10), len(data_long), len(data_lat)))
+    assert len(data_pm10) == len(data_long) == len(data_lat)
 
     # Make a blank image for the hexagon overlay,
     # initialized to a completely transparent color.
@@ -238,7 +240,6 @@ def draw_map(world_data, name, size, zoom, latitude, longitude, legend=0):
         % max(mean(_.data) for _ in hexagons if _.data)
     )
     print("Worst PM 10 sensor value %0.2f ug/m3" % max(data_pm10))
-    print("Worst PM 2.5 sensor value %0.2f ug/m3" % max(data_pm2_5))
 
     for hex in hexagons:
         if hex.data:
