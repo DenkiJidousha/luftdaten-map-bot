@@ -89,7 +89,7 @@ def conv_to_color(conc, alpha=125):
         return (0x00, 0x79, 0x6B, alpha)  # fixed
 
 
-hex_h2 = 10.0  # triangle side; half height
+hex_h2 = 20.0  # triangle side; half height
 hex_h4 = hex_h2 / 2.0
 hex_w2 = hex_h2 * sqrt(3) / 2.0
 
