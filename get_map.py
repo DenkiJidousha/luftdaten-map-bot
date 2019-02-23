@@ -5,6 +5,7 @@ from statistics import mean
 
 import geotiler
 import json
+from matplotlib.colors import LinearSegmentedColormap
 from PIL import Image, ImageDraw
 
 legend_img = Image.open("legend.png")
@@ -51,20 +52,42 @@ jobs = [
 # valueDomain: [20, 40, 60, 100, 500],
 # colorRange: ['#00796B', '#F9A825', '#E65100', '#DD2C00', '#960084'],
 
+alpha = 125 / 256
+cdict = {
+    "red": [
+        [0 / 500, 0x00 / 256, 0x00 / 256],
+        [20 / 500, 0x00 / 256, 0x00 / 256],
+        [40 / 500, 0xF9 / 256, 0xF9 / 256],
+        [60 / 500, 0xE6 / 256, 0xE6 / 256],
+        [100 / 500, 0xDD / 256, 0xDD / 256],
+        [500 / 500, 0x96 / 256, 0x96 / 256],
+    ],
+    "green": [
+        [0 / 500, 0x79 / 256, 0x79 / 256],
+        [20 / 500, 0x79 / 256, 0x79 / 256],
+        [40 / 500, 0xA8 / 256, 0xA8 / 256],
+        [60 / 500, 0x51 / 256, 0x51 / 256],
+        [100 / 500, 0x2C / 256, 0x2C / 256],
+        [500 / 500, 0x00 / 256, 0x00 / 256],
+    ],
+    "blue": [
+        [0 / 500, 0x6B / 256, 0x6B / 256],
+        [20 / 500, 0x6B / 256, 0x6B / 256],
+        [40 / 500, 0x25 / 256, 0x25 / 256],
+        [60 / 500, 0x00 / 256, 0x00 / 256],
+        [100 / 500, 0x00 / 256, 0x00 / 256],
+        [500 / 500, 0x84 / 256, 0x84 / 256],
+    ],
+    "alpha": [[0.0, alpha, alpha], [1.0, alpha, alpha]],
+}
+color_map = LinearSegmentedColormap("LuftdatenPM2.5", segmentdata=cdict, N=500)
+assert color_map(0.0) == (0x00 / 256, 0x79 / 256, 0x6B / 256, alpha), color_map(0.0)
+assert color_map(1.0) == (0x96 / 256, 0x00 / 256, 0x84 / 256, alpha), color_map(1.0)
+
 
 def conv_to_color(conc, alpha=125):
-    if conc >= 500:
-        return (0x96, 0x00, 0x84, alpha)  # fixed
-    if conc >= 100:
-        return (0x96, 0x00, 0x84, alpha)  # TODO - scaled
-    elif conc >= 60:
-        return (0xDD, 0x2C, 0x00, alpha)  # TODO - scaled
-    elif conc >= 40:
-        return (0xE6, 0x51, 0x00, alpha)  # TODO - scaled
-    elif conc >= 20:
-        return (0xF9, 0xA8, 0x25, alpha)  # TODO - scaled
-    else:
-        return (0x00, 0x79, 0x6B, alpha)  # fixed
+    r, g, b, _ = color_map(min(500, conc) / 500)
+    return int(r * 256), int(g * 256), int(b * 256), alpha
 
 
 hex_h2 = 20.0  # triangle side; half height
@@ -209,6 +232,14 @@ def draw_map(world_data, name, size, zoom, latitude, longitude, legend=0):
             if (x, y) in hex:
                 hex.data.append(value)
                 break
+
+    print(
+        "Worst hexagon mean PM 10 value %0.2f ug/m3"
+        % max(mean(_.data) for _ in hexagons if _.data)
+    )
+    print("Worst PM 10 sensor value %0.2f ug/m3" % max(data_pm10))
+    print("Worst PM 2.5 sensor value %0.2f ug/m3" % max(data_pm2_5))
+
     for hex in hexagons:
         if hex.data:
             draw.polygon(hex.polygon(), hex.color())
