@@ -70,6 +70,7 @@ def conv_to_color(conc, alpha=125):
 hex_h2 = 20.0  # triangle side; half height
 hex_h4 = hex_h2 / 2.0
 hex_w2 = hex_h2 * sqrt(3) / 2.0
+hex_grad = hex_h4 / hex_w2
 
 
 class Hexagon(object):
@@ -99,11 +100,26 @@ class Hexagon(object):
             return False
         if y1 < y0 - hex_h2 or y0 + hex_h2 < y1:
             return False
-        if y0 - hex_h4 < y1 < y0 + hex_h4:
+        if y1 > y0 + hex_h4:
+            # Could be in top triangle...
+            if x0 < x1:
+                # Top right, but above or below the slope?
+                return (y1 - y0 - hex_h2) / (x1 - x0) < -hex_grad
+            else:
+                # Top left
+                return hex_grad < (y1 - y0 - hex_h2) / (x1 - x0)
+        elif y1 < y0 - hex_h4:
+            # Could be in bottom triangle...
+            if x0 < x1:
+                # Bottom right
+                return hex_grad < (y1 - y0 + hex_h2) / (x1 - x0)
+            else:
+                # Bottom left
+                return (y1 - y0 + hex_h2) / (x1 - x0) < -hex_grad
+        else:
+            assert y0 - hex_h4 <= y1 <= y0 + hex_h4
             # Central rectangle
             return True
-        # TODO - corners
-        return True
 
     def polygon(self):
         """Returns list of (x, y) values to draw the hexagon (floats)."""
@@ -198,6 +214,14 @@ def draw_map(world_data, name, size, zoom, latitude, longitude, legend=0):
             draw.polygon(hex.polygon(), hex.color())
         # else:
         #     draw.polygon(hex.polygon(), (0,0,0xff,0xC0))
+
+    # Debug code to check hexagons contain the points
+    # for x, y, value in zip(data_x, data_y, data_pm10):
+    #     if value:
+    #         draw.polygon(
+    #             [(x - 5, y - 5), (x - 5, y + 5), (x + 5, y + 5), (x + 5, y - 5)],
+    #             (255, 0, 255, 125),
+    #         )
 
     # Alpha composite the two images together.
     img = Image.alpha_composite(map_img, hex_img)
